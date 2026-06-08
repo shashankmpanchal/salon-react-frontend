@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --color-salon-50: #fdf8f6;
+  --color-salon-100: #f9ede8;
+  --color-salon-200: #f2d9cf;
+  --color-salon-300: #e8bfb0;
+  --color-salon-400: #d49a84;
+  --color-salon-500: #c47a62;
+  --color-salon-600: #b05f47;
+  --color-salon-700: #934b38;
+  --color-salon-800: #7a3f31;
+  --color-salon-900: #65362b;
+  --color-salon-950: #361a14;
+}
+
+body {
+  @apply bg-salon-50 text-salon-950 antialiased;
+  font-family: var(--font-sans);
+}
