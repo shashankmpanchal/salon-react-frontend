@@ -6,7 +6,9 @@ export const ROUTES = {
   BOOK: '/book-appointment',
   HISTORY: '/booking-history',
   ADMIN: '/admin',
-}
+  SEATS: '/seats',
+  SERVICES: '/services',
+};
 
 export const SEATS = [
   { id: 1, name: 'Chair 1', stylist: 'Emma' },
