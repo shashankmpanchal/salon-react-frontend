@@ -7,6 +7,8 @@ import Dashboard from '../pages/Dashboard'
 import BookingCalendar from '../pages/BookingCalendar'
 import BookingHistory from '../pages/BookingHistory'
 import AdminDashboard from '../pages/AdminDashboard'
+import Seats from '../pages/seats'
+import Services from '../pages/services'
 // import ProtectedRoute from '../components/auth/ProtectedRoute'
 import { HomeRedirect, ProtectedRoute } from './RouteGuards'
 
@@ -44,7 +46,11 @@ export const protectedRoutes = [
     children: [
       {
         element: <Layout />,
-        children: [{ path: ROUTES.ADMIN, element: <AdminDashboard /> }],
+        children: [
+          { path: ROUTES.ADMIN, element: <AdminDashboard /> },
+          { path: ROUTES.SEATS, element: <Seats /> },
+          { path: ROUTES.SERVICES, element: <Services /> },
+        ],
       },
     ],
   },

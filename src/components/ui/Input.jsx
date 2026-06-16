@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 
 const Input = forwardRef(function Input({ label, error, id, className = '', ...props }, ref) {
   const inputId = id || props.name
+
   return (
     <div className="w-full">
       {label && (
