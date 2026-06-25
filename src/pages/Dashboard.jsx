@@ -13,19 +13,26 @@ const ACTIVE_BOOKING_STATUSES = ['pending', 'confirmed']
 
 export default function Dashboard() {
   const { user } = useSelector((s) => s.auth)
-  const { history } = useSelector((s) => s.booking)
+  const { history, loading } = useSelector((s) => s.booking)
   const dispatch = useDispatch()
 
   useEffect(() => {
     if (user?.id) dispatch(loadUserBookings(user.id))
   }, [dispatch, user?.id])
 
-  const upcoming = history.filter(
-    (b) => ACTIVE_BOOKING_STATUSES.includes(b.status) && b.date >= new Date().toISOString().split('T')[0],
-  )
-  const past = history.filter(
-    (b) => !ACTIVE_BOOKING_STATUSES.includes(b.status) || b.date < new Date().toISOString().split('T')[0],
-  )
+  const upcoming = history.filter((b) => ACTIVE_BOOKING_STATUSES.includes(b.status))
+  const completedVisits = history.filter((b) => b.status === 'completed').length
+
+  const findSeat = (seatId) => SEATS.find((seat) => seat.id === seatId)
+  const findService = (serviceId) => SERVICES.find((service) => service.id === serviceId)
+
+  if (loading && history.length === 0) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -47,8 +54,8 @@ export default function Dashboard() {
           <p className="mt-1 text-3xl font-bold text-salon-900">{upcoming.length}</p>
         </Card>
         <Card className="!p-4">
-          <p className="text-sm text-salon-500">Past visits</p>
-          <p className="mt-1 text-3xl font-bold text-salon-900">{past.length}</p>
+          <p className="text-sm text-salon-500">Completed visits</p>
+          <p className="mt-1 text-3xl font-bold text-salon-900">{completedVisits}</p>
         </Card>
         <Card className="!p-4">
           <p className="text-sm text-salon-500">Available chairs</p>
@@ -57,11 +64,7 @@ export default function Dashboard() {
       </div>
 
       <Card title="Upcoming appointments" subtitle="Your next visits at LuxeCuts">
-        {!history.length ? (
-          <div className="py-8 text-center">
-            <LoadingSpinner className="mx-auto" />
-          </div>
-        ) : upcoming.length === 0 ? (
+        {upcoming.length === 0 ? (
           <div className="py-8 text-center text-salon-500">
             <p>No upcoming appointments.</p>
             <Link to={ROUTES.BOOK} className="mt-4 inline-block">
@@ -70,27 +73,34 @@ export default function Dashboard() {
           </div>
         ) : (
           <ul className="divide-y divide-salon-100">
-            {upcoming.slice(0, 5).map((b) => {
-              const seat = SEATS.find((s) => s.id === b.seatId)
-              const service = SERVICES.find((s) => s.id === b.serviceId)
+            {upcoming.slice(0, 5).map((booking) => {
+              const seat = findSeat(booking.seatId)
+              const service = findService(booking.serviceId)
+
               return (
-                <li key={b.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <li
+                  key={booking.id}
+                  className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div>
                     <p className="font-medium text-salon-900">
-                      {formatDisplayDate(b.date)} at {b.slot}
+                      {formatDisplayDate(booking.date)} at {booking.slot}
                     </p>
                     <p className="text-sm text-salon-500">
-                      {seat?.name} · {seat?.stylist} · {service?.label || 'Service'}
+                      {seat?.name || 'Seat'} · {service?.label || booking.serviceLabel || 'Service'}
                     </p>
                   </div>
-                  <Badge variant={b.status}>{b.status}</Badge>
+                  <Badge variant={booking.status}>{booking.status}</Badge>
                 </li>
               )
             })}
           </ul>
         )}
         {upcoming.length > 0 && (
-          <Link to={ROUTES.HISTORY} className="mt-4 inline-block text-sm font-medium text-salon-700 hover:text-salon-900">
+          <Link
+            to={ROUTES.HISTORY}
+            className="mt-4 inline-block text-sm font-medium text-salon-700 hover:text-salon-900"
+          >
             View all history →
           </Link>
         )}
@@ -98,11 +108,14 @@ export default function Dashboard() {
 
       <Card title="Our services">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {SERVICES.map((s) => (
-            <div key={s.id} className="rounded-xl border border-salon-100 bg-salon-50/50 p-4">
-              <p className="font-semibold text-salon-900">{s.label}</p>
+          {SERVICES.map((service) => (
+            <div
+              key={service.id}
+              className="rounded-xl border border-salon-100 bg-salon-50/50 p-4"
+            >
+              <p className="font-semibold text-salon-900">{service.label}</p>
               <p className="mt-1 text-sm text-salon-500">
-                ${s.price} · {s.duration} min
+                INR {service.price} · {service.duration} min
               </p>
             </div>
           ))}

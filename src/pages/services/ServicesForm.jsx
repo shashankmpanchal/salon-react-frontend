@@ -128,7 +128,7 @@ export default function ServicesForm({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-salon-950/60 px-4 backdrop-blur-sm"
+      className="fixed mb-0 inset-0 z-50 flex items-center justify-center overflow-hidden bg-salon-950/60 px-4 backdrop-blur-none"
       onClick={handleClose}
     >
       <div
@@ -139,7 +139,10 @@ export default function ServicesForm({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
-          <h2 id="service-form-title" className="font-display text-xl font-bold text-salon-900">
+          <h2
+            id="service-form-title"
+            className="font-display text-xl font-bold text-salon-900"
+          >
             {isEdit ? 'Edit service' : 'Create service'}
           </h2>
           <button
@@ -157,7 +160,11 @@ export default function ServicesForm({
         ) : fetchError && isEdit ? (
           <Alert type="error" message={fetchError} onClose={handleClose} />
         ) : showForm ? (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+            noValidate
+          >
             {successMessage && (
               <Alert
                 type="success"
@@ -240,5 +247,5 @@ export default function ServicesForm({
         ) : null}
       </div>
     </div>
-  )
+  );
 }

@@ -1,23 +1,13 @@
 import api from './axios'
 import { STORAGE_KEYS } from '../utils/constants'
-
-function normalizeUser(user) {
-  if (!user) return null
-  return {
-    ...user,
-    id: user.id || user._id,
-  }
-}
-
-function storeSession({ user, accessToken, refreshToken }) {
-  const normalizedUser = normalizeUser(user)
-  localStorage.setItem(STORAGE_KEYS.token, accessToken)
-  if (refreshToken) {
-    localStorage.setItem(STORAGE_KEYS.refreshToken, refreshToken)
-  }
-  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(normalizedUser))
-  return { token: accessToken, refreshToken, user: normalizedUser }
-}
+import {
+  clearSession,
+  getStoredToken,
+  getStoredUser,
+  normalizeUser,
+  storeSession,
+} from './session'
+import { refreshAccessToken } from './tokenRefresh'
 
 export async function loginRequest({ email, password }) {
   const response = await api.post('/auth/login', { email, password })
@@ -35,16 +25,13 @@ export async function logoutRequest() {
   } catch {
     // Clear local session even if the server token is already expired.
   } finally {
-    localStorage.removeItem(STORAGE_KEYS.token)
-    localStorage.removeItem(STORAGE_KEYS.refreshToken)
-    localStorage.removeItem(STORAGE_KEYS.user)
+    clearSession()
   }
 }
 
 export async function refreshTokenRequest() {
-  const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken)
-  const response = await api.post('/auth/refresh-token', { refreshToken })
-  return storeSession(response.data.data)
+  const session = await refreshAccessToken()
+  return session
 }
 
 export async function profileRequest() {
@@ -54,24 +41,7 @@ export async function profileRequest() {
   return user
 }
 
-export function clearStoredSession() {
-  localStorage.removeItem(STORAGE_KEYS.token)
-  localStorage.removeItem(STORAGE_KEYS.refreshToken)
-  localStorage.removeItem(STORAGE_KEYS.user)
-}
-
-export function getStoredUser() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.user)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
-
-export function getStoredToken() {
-  return localStorage.getItem(STORAGE_KEYS.token)
-}
+export { clearSession as clearStoredSession, getStoredToken, getStoredUser }
 
 export const authApi = {
   login: (data) => loginRequest(data),

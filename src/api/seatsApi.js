@@ -1,14 +1,42 @@
+import { getApiEndPoints } from '../utils/common';
 import api from './axios'
 
 function mapSeat(seat) {
   return {
-    id: seat._id,
+    id: seat.id || seat._id,
     seatId: seat.seatId,
-    seatName: seat.seatName,
+    name: seat.name || seat.seatName,
+    seatName: seat.seatName || seat.name,
     status: seat.status,
     createdAt: seat.createdAt,
     updatedAt: seat.updatedAt,
   }
+}
+
+/** Maps API seats for booking UI — availability keys use numeric seatId */
+export function mapSeatForBooking(seat) {
+  const mapped = mapSeat(seat)
+  return {
+    ...mapped,
+    id: mapped.seatId,
+    // seatId: mapped.seatId,
+    stylist: mapped.name,
+  };
+}
+
+let allSeatsLoad = null
+
+export async function fetchAllSeatsForBooking() {
+  if (!allSeatsLoad) {
+    allSeatsLoad = fetchAllSeats()
+      .then((seats) =>
+        seats.map(mapSeatForBooking).sort((a, b) => a.seatId - b.seatId),
+      )
+      .finally(() => {
+        allSeatsLoad = null
+      })
+  }
+  return allSeatsLoad
 }
 
 export async function fetchSeats(params = {}) {
@@ -22,7 +50,7 @@ export async function fetchSeats(params = {}) {
     sortOrder = 'asc',
   } = params
 
-  const response = await api.get('/admin/seats', {
+  const response = await api.get(`${getApiEndPoints()}seats`, {
     params: {
       page,
       limit,
@@ -32,7 +60,7 @@ export async function fetchSeats(params = {}) {
       ...(seatName ? { seatName } : {}),
       ...(status ? { status } : {}),
     },
-  })
+  });
 
   const { seats = [], pagination } = response.data.data
 
@@ -42,16 +70,22 @@ export async function fetchSeats(params = {}) {
   }
 }
 
+export async function fetchAllSeats() {
+  const response = await api.get(`${getApiEndPoints()}seats/all`);
+  const seats = response.data.data.seats || []
+  return seats.map(mapSeat)
+}
+
 export async function fetchSeatById(seatId) {
-  const response = await api.get(`/admin/seats/${seatId}`)
+  const response = await api.get(`${getApiEndPoints()}seats/${seatId}`);
   return mapSeat(response.data.data.seat || response.data.data)
 }
 
 export async function createSeat(payload) {
-  const response = await api.post('/admin/seats', {
+  const response = await api.post(`${getApiEndPoints()}seats`, {
     seatName: payload.seatName.trim(),
     status: payload.status,
-  })
+  });
   return mapSeat(response.data.data.seat || response.data.data)
 }
 
@@ -60,16 +94,21 @@ export async function updateSeat(seatId, payload) {
   if (payload.seatName?.trim()) body.seatName = payload.seatName.trim()
   if (payload.status) body.status = payload.status
 
-  const response = await api.put(`/admin/seats/${seatId}`, body)
+  const response = await api.put(
+    `${getApiEndPoints()}seats/${seatId}`,
+    body,
+  );
   return mapSeat(response.data.data.seat || response.data.data)
 }
 
 export async function deleteSeat(seatId) {
-  await api.delete(`/admin/seats/${seatId}`)
+  await api.delete(`${getApiEndPoints()}seats/${seatId}`);
 }
 
 export const seatsApi = {
   getAll: fetchSeats,
+  getAllSeats: fetchAllSeats,
+  getAllForBooking: fetchAllSeatsForBooking,
   getById: fetchSeatById,
   create: createSeat,
   update: updateSeat,

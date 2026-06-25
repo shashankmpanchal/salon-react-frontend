@@ -1,8 +1,6 @@
 import api from './axios'
-import { SEATS, SERVICES } from '../utils/constants'
+import { SEATS } from '../utils/constants'
 import { formatDate } from '../utils/dates'
-
-const DEFAULT_SERVICE = SERVICES[0]
 
 function buildSeats(totalSeats = SEATS.length) {
   return Array.from({ length: totalSeats }, (_, index) => {
@@ -52,9 +50,6 @@ function mapSlotAvailability(slotRows = []) {
 
 function mapBooking(booking, fallback = {}) {
   const user = typeof booking.userId === 'object' ? booking.userId : null
-  const serviceId = booking.serviceId || fallback.serviceId || DEFAULT_SERVICE.id
-  const service = SERVICES.find((item) => item.id === serviceId) || DEFAULT_SERVICE
-  const seatId = booking.seatId || booking.seatNumber || fallback.seatId
 
   return {
     ...fallback,
@@ -66,14 +61,12 @@ function mapBooking(booking, fallback = {}) {
     userName: booking.userName || user?.name || fallback.userName,
     date: booking.date || dateOnly(booking.bookingDate),
     slot: booking.slot || booking.slotTime,
-    seatId,
-    seatName:
-      booking.seatName || SEATS.find((seat) => seat.id === seatId)?.name,
-    stylist:
-      booking.stylist || SEATS.find((seat) => seat.id === seatId)?.stylist,
-    serviceId,
-    serviceLabel: booking.serviceLabel || service.label,
-    price: booking.price ?? service.price,
+    seatId: booking?.seat?.seatId,
+    seatName: booking?.seat?.seatName,
+    serviceId: booking?.service?.id,
+    serviceLabel: booking?.service?.name,
+    price: booking?.service?.pricing,
+    duration: booking?.service?.duration,
     status: booking.status,
     payment: booking.payment,
     createdAt: booking.createdAt,
@@ -109,7 +102,8 @@ export async function createBooking(payload) {
   const response = await api.post('/bookings/create', {
     bookingDate: payload.date,
     slotTime: payload.slot,
-    seatNumber: payload.seatId
+    seatNumber: payload.seatId,
+    serviceId: payload.serviceId,
   });
   return mapBooking(response.data.data.booking, payload)
 }

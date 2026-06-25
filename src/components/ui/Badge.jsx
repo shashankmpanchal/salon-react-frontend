@@ -1,7 +1,8 @@
 const styles = {
-  confirmed: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-salon-100 text-salon-600',
-  pending: 'bg-amber-100 text-amber-800',
+  completed: 'bg-green-100 text-green-800',
+  confirmed: 'bg-blue-100 text-blue-800',
+  cancelled: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800',
   available: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
   occupied: 'bg-red-50 text-red-700 border border-red-200',
   active: 'bg-emerald-100 text-emerald-800',

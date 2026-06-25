@@ -28,7 +28,6 @@ export default function SeatGrid({
         const status = getSeatStatus(seat.id)
         const isSelected = selectedSeat === seat.id
         const isDisabled = disabled || (selectedSlot && status === 'occupied')
-
         return (
           <button
             key={seat.id}

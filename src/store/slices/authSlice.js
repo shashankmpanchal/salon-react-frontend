@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { authApi, getStoredUser, getStoredToken } from '../../api/authApi'
+import { authApi } from '../../api/authApi'
+import { getStoredToken, getStoredUser } from '../../api/session'
 
 export const login = createAsyncThunk(
   'auth/login',
@@ -39,6 +40,11 @@ const authSlice = createSlice({
     clearAuthError: (state) => {
       state.error = null
     },
+    setSession: (state, action) => {
+      state.user = action.payload.user ?? null
+      state.token = action.payload.token ?? null
+      state.error = null
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -76,5 +82,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearAuthError } = authSlice.actions
+export const { clearAuthError, setSession } = authSlice.actions
 export default authSlice.reducer
